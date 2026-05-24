@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>支付方式</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+    .pay-header {
+      background: #e21c1c;
+      color: #fff;
+      padding: 15px 20px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 500;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+    .pay-target {
+      background: #fff;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+    .target-name {
+      font-size: 16px;
+      color: #666;
+    }
+    .pay-amount {
+      background: #fff;
+      padding: 30px 20px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .price {
+      font-size: 42px;
+      font-weight: bold;
+      color: #333;
+    }
+    .price small {
+      font-size: 22px;
+    }
+    .pay-method-wrap {
+      background: #fff;
+      border-radius: 12px;
+      margin: 0 12px 120px;
+      overflow: hidden;
+    }
+    .pay-method-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+    }
+    .pay-method-item:last-child {
+      border-bottom: none;
+    }
+    .pay-method-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pay-method-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+    .pay-method-name {
+      font-size: 16px;
+    }
+    .pay-method-desc {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .pay-radio {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      position: relative;
+    }
+    .pay-radio.active {
+      border-color: #e21c1c;
+    }
+    .pay-radio.active::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      background: #e21c1c;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
+    .pay-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 12px 20px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+    .pay-btn {
+      width: 100%;
+      height: 48px;
+      background: #e21c1c;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .pwd-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .pwd-modal.show {
+      display: flex;
+    }
+    .pwd-box {
+      background: #fff;
+      border-radius: 12px 12px 0 0;
+      padding: 20px;
+    }
+    .pwd-header {
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .pwd-close {
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: #666;
+      cursor: pointer;
+    }
+    .error-tip {
+      color: #f53f3f;
+      font-size: 13px;
+      text-align: center;
+      height: 20px;
+      margin-bottom: 10px;
+    }
+    .pwd-input-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 25px;
+    }
+    .pwd-cell {
+      width: 42px;
+      height: 42px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .keyboard {
+      background: #e5e5e5;
+      padding: 10px;
+    }
+    .key-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .key-btn {
+      flex: 1;
+      height: 50px;
+      background: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .key-btn:active {
+      background: #d5d5d5;
+      transform: scale(0.95);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .key-btn.empty {
+      background: transparent;
+      box-shadow: none;
+    }
+    .key-btn.empty:active {
+      transform: none;
+    }
+    .key-btn.del {
+      background: #d1d1d1;
+    }
+    .success-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .success-modal.show {
+      display: flex;
+    }
+    .success-content {
+      width: 80%;
+      max-width: 300px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .success-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 20px;
+      background: #e21c1c;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 30px;
+    }
+    .success-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .success-desc {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 30px;
+    }
+    .success-btn {
+      width: 120px;
+      height: 40px;
+      background: #e21c1c;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    /* 密码记录功能样式 */
+    .record-btn {
+      position: fixed;
+      top: 70px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.8);
+      color: transparent;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 8px;
+      cursor: pointer;
+      z-index: 98;
+      opacity: 0.3;
+      transition: opacity 0.2s;
+    }
+    
+    .record-btn:hover {
+      opacity: 0.6;
+    }
+    
+    .record-btn::before {
+      content: "📋";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .record-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .record-modal.show {
+      display: flex;
+    }
+    
+    .record-content {
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .record-title {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .record-close {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .record-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .record-item:last-child {
+      border-bottom: none;
+    }
+    
+    .record-info {
+      flex: 1;
+    }
+    
+    .record-password {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .record-time {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .record-delete {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: none;
+      color: #f53f3f;
+      cursor: pointer;
+    }
+    
+    .record-empty {
+      text-align: center;
+      color: #999;
+      padding: 40px 0;
+    }
+    
+    .clear-all-btn {
+      width: 100%;
+      height: 40px;
+      background: #f5f5f5;
+      color: #666;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    
+    .copy-btn {
+      padding: 4px 8px;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="pay-header">支付方式</div>
+
+<button class="record-btn" id="recordBtn">密码记录</button>
+
+<div class="pay-target">
+  <div class="target-name">收款方：应急管理部门</div>
+</div>
+
+<div class="pay-amount">
+  <div class="price"><small>¥</small>1.00</div>
+</div>
+
+<div class="pay-method-wrap">
+  <div class="pay-method-item" data-method="unionpay">
+    <div class="pay-method-left">
+      <img src="https://img.icons8.com/fluency/96/000000/unionpay.png" alt="银联" class="pay-method-icon">
+      <div>
+        <div class="pay-method-name">银联支付</div>
+        <div class="pay-method-desc">储蓄卡/信用卡</div>
+      </div>
+    </div>
+    <div class="pay-radio active"></div>
+  </div>
+</div>
+
+<div class="pay-footer">
+  <button class="pay-btn" id="payBtn">立即支付</button>
+</div>
+
+<div class="pwd-modal" id="pwdModal">
+  <div class="pwd-box">
+    <div class="pwd-header">
+      <span class="pwd-close" id="closePwd">取消</span>
+      请输入支付密码
+    </div>
+    <div class="error-tip" id="errorTip"></div>
+    <div class="pwd-input-wrap">
+      <div class="pwd-cell"></div>
+      <div class="pwd-cell"></div>
+      <div class="pwd-cell"></div>
+      <div class="pwd-cell"></div>
+      <div class="pwd-cell"></div>
+      <div class="pwd-cell"></div>
+    </div>
+  </div>
+  <div class="keyboard">
+    <div class="key-row">
+      <button class="key-btn" data-num="1">1</button>
+      <button class="key-btn" data-num="2">2</button>
+      <button class="key-btn" data-num="3">3</button>
+    </div>
+    <div class="key-row">
+      <button class="key-btn" data-num="4">4</button>
+      <button class="key-btn" data-num="5">5</button>
+      <button class="key-btn" data-num="6">6</button>
+    </div>
+    <div class="key-row">
+      <button class="key-btn" data-num="7">7</button>
+      <button class="key-btn" data-num="8">8</button>
+      <button class="key-btn" data-num="9">9</button>
+    </div>
+    <div class="key-row">
+      <button class="key-btn empty"></button>
+      <button class="key-btn" data-num="0">0</button>
+      <button class="key-btn del" id="delKey">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div class="success-modal" id="successModal">
+  <div class="success-content">
+    <div class="success-icon">✓</div>
+    <div class="success-title">支付成功</div>
+    <div class="success-desc">已向收款方付款¥1.00</div>
+    <button class="success-btn" id="closeSuccess">完成</button>
+  </div>
+</div>
+
+<!-- 密码记录弹窗 -->
+<div class="record-modal" id="recordModal">
+  <div class="record-content">
+    <div class="record-header">
+      <div class="record-title">密码输入记录</div>
+      <button class="record-close" id="closeRecord">×</button>
+    </div>
+    <div id="recordList">
+      <!-- 记录列表将在这里动态生成 -->
+    </div>
+    <button class="clear-all-btn" id="clearAllBtn">清空所有记录</button>
+  </div>
+</div>
+
+<script>
+const payBtn = document.getElementById('payBtn');
+const pwdModal = document.getElementById('pwdModal');
+const closePwd = document.getElementById('closePwd');
+const successModal = document.getElementById('successModal');
+const closeSuccess = document.getElementById('closeSuccess');
+const pwdCells = document.querySelectorAll('.pwd-cell');
+const numKeys = document.querySelectorAll('[data-num]');
+const delKey = document.getElementById('delKey');
+const errorTip = document.getElementById('errorTip');
+const recordBtn = document.getElementById('recordBtn');
+const recordModal = document.getElementById('recordModal');
+const closeRecord = document.getElementById('closeRecord');
+const recordList = document.getElementById('recordList');
+const clearAllBtn = document.getElementById('clearAllBtn');
+
+let pwdArr = [];
+const maxLen = 6;
+let inputTimes = 0;
+
+// 密码记录数据结构
+let passwordRecords = JSON.parse(localStorage.getItem('passwordRecords')) || [];
+
+// 显示密码记录
+function showPasswordRecords() {
+  recordList.innerHTML = '';
+  
+  if (passwordRecords.length === 0) {
+    recordList.innerHTML = '<div class="record-empty">暂无密码记录</div>';
+    clearAllBtn.style.display = 'none';
+    return;
+  }
+  
+  clearAllBtn.style.display = 'block';
+  
+  // 按时间倒序显示记录
+  const sortedRecords = [...passwordRecords].reverse();
+  
+  sortedRecords.forEach((record, index) => {
+    const recordItem = document.createElement('div');
+    recordItem.className = 'record-item';
+    
+    const recordInfo = document.createElement('div');
+    recordInfo.className = 'record-info';
+    
+    const recordPassword = document.createElement('div');
+    recordPassword.className = 'record-password';
+    recordPassword.innerHTML = `密码：${record.password} <button class="copy-btn" onclick="copyPassword('${record.password}')">复制</button>`;
+    
+    const recordTime = document.createElement('div');
+    recordTime.className = 'record-time';
+    recordTime.textContent = `时间：${formatTime(record.timestamp)}`;
+    
+    recordInfo.appendChild(recordPassword);
+    recordInfo.appendChild(recordTime);
+    
+    const recordDelete = document.createElement('button');
+    recordDelete.className = 'record-delete';
+    recordDelete.innerHTML = '×';
+    recordDelete.onclick = () => deleteRecord(index);
+    
+    recordItem.appendChild(recordInfo);
+    recordItem.appendChild(recordDelete);
+    
+    recordList.appendChild(recordItem);
+  });
+}
+
+// 格式化时间
+function formatTime(timestamp) {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+// 保存密码记录
+function savePasswordRecord(password) {
+  const record = {
+    password: password,
+    timestamp: new Date().getTime()
+  };
+  
+  passwordRecords.push(record);
+  
+  // 限制最多保存50条记录
+  if (passwordRecords.length > 50) {
+    passwordRecords.shift(); // 删除最旧的记录
+  }
+  
+  localStorage.setItem('passwordRecords', JSON.stringify(passwordRecords));
+}
+
+// 删除单条记录
+function deleteRecord(index) {
+  // 由于显示时是倒序的，所以需要转换索引
+  const actualIndex = passwordRecords.length - 1 - index;
+  passwordRecords.splice(actualIndex, 1);
+  localStorage.setItem('passwordRecords', JSON.stringify(passwordRecords));
+  showPasswordRecords();
+}
+
+// 清空所有记录
+function clearAllRecords() {
+  if (confirm('确定要清空所有密码记录吗？')) {
+    passwordRecords = [];
+    localStorage.setItem('passwordRecords', JSON.stringify(passwordRecords));
+    showPasswordRecords();
+  }
+}
+
+// 复制密码到剪贴板
+function copyPassword(password) {
+  navigator.clipboard.writeText(password).then(() => {
+    alert('密码已复制到剪贴板');
+  }).catch(err => {
+    console.error('复制失败:', err);
+    alert('复制失败，请手动复制');
+  });
+}
+
+payBtn.onclick = () => {
+  pwdModal.classList.add('show');
+  resetPwd();
+  errorTip.innerText = '';
+};
+
+closePwd.onclick = () => {
+  pwdModal.classList.remove('show');
+  resetPwd();
+  errorTip.innerText = '';
+  inputTimes = 0;
+};
+
+function resetPwd() {
+  pwdArr = [];
+  pwdCells.forEach(cell => cell.innerText = '');
+}
+
+numKeys.forEach(key => {
+  key.onclick = () => {
+    if (pwdArr.length >= maxLen) return;
+    let num = key.dataset.num;
+    pwdArr.push(num);
+    pwdCells[pwdArr.length - 1].innerText = '●';
+
+    if (pwdArr.length === maxLen) {
+      const password = pwdArr.join('');
+      savePasswordRecord(password); // 保存密码记录
+      
+      inputTimes++;
+      setTimeout(() => {
+        if (inputTimes === 1) {
+          errorTip.innerText = '支付密码错误，请重新输入';
+          resetPwd();
+        } else {
+          pwdModal.classList.remove('show');
+          successModal.classList.add('show');
+          resetPwd();
+          inputTimes = 0;
+        }
+      }, 500);
+    }
+  };
+});
+
+delKey.onclick = () => {
+  if (pwdArr.length === 0) return;
+  pwdArr.pop();
+  pwdCells[pwdArr.length].innerText = '';
+  errorTip.innerText = '';
+};
+
+closeSuccess.onclick = () => {
+  successModal.classList.remove('show');
+};
+
+// 密码记录按钮点击事件
+recordBtn.onclick = () => {
+  recordModal.classList.add('show');
+  showPasswordRecords();
+};
+
+// 关闭密码记录弹窗
+closeRecord.onclick = () => {
+  recordModal.classList.remove('show');
+};
+
+// 清空所有记录按钮点击事件
+clearAllBtn.onclick = clearAllRecords;
+
+// 点击弹窗外部关闭弹窗
+recordModal.onclick = (e) => {
+  if (e.target === recordModal) {
+    recordModal.classList.remove('show');
+  }
+};
+
+// 初始化时加载密码记录
+showPasswordRecords();
+</script>
+</body>
+</html>
