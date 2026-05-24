@@ -30,6 +30,10 @@
       position: sticky;
       top: 0;
       z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
     .pay-target {
       background: #fff;
@@ -274,36 +278,51 @@
       font-weight: 500;
     }
     
-    /* 密码记录功能样式 */
+    /* 密码记录功能样式 - 隐藏式 */
     .record-btn {
-      position: fixed;
-      top: 70px;
-      right: 12px;
-      width: 32px;
-      height: 32px;
-      background: rgba(255,255,255,0.8);
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: transparent;
       color: transparent;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 8px;
+      border: none;
       cursor: pointer;
-      z-index: 98;
-      opacity: 0.3;
+      z-index: 100;
+      opacity: 0;
       transition: opacity 0.2s;
     }
     
     .record-btn:hover {
-      opacity: 0.6;
+      opacity: 0.3;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
     }
     
     .record-btn::before {
-      content: "📋";
+      content: "";
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 14px;
-      color: #666;
+      width: 20px;
+      height: 20px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 2px;
+    }
+    
+    .record-btn::after {
+      content: "";
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 2px;
+      background: rgba(255,255,255,0.5);
+      box-shadow: 0 4px 0 rgba(255,255,255,0.5), 0 8px 0 rgba(255,255,255,0.5);
     }
     
     .record-modal {
@@ -420,9 +439,10 @@
   </style>
 </head>
 <body>
-<div class="pay-header">支付方式</div>
-
-<button class="record-btn" id="recordBtn">密码记录</button>
+<div class="pay-header">
+  <span>支付方式</span>
+  <button class="record-btn" id="recordBtn" title="点击查看密码记录"></button>
+</div>
 
 <div class="pay-target">
   <div class="target-name">收款方：应急管理部门</div>
